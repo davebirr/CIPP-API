@@ -3,17 +3,18 @@ using namespace System.Net
 Function Invoke-ListApplicationQueue {
     <#
     .FUNCTIONALITY
-    Entrypoint
+        Entrypoint
+    .ROLE
+        Endpoint.Application.Read
     #>
     [CmdletBinding()]
     param($Request, $TriggerMetadata)
 
-    $APIName = $TriggerMetadata.FunctionName
-    Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -message 'Accessed this API' -Sev 'Debug'
+    $APIName = $Request.Params.CIPPEndpoint
+    $Headers = $Request.Headers
+    Write-LogMessage -headers $Headers -API $APIName -message 'Accessed this API' -Sev 'Debug'
 
 
-    # Write to the Azure Functions log stream.
-    Write-Host 'PowerShell HTTP trigger function processed a request.'
     $Table = Get-CippTable -tablename 'apps'
     $QueuedApps = (Get-CIPPAzDataTableEntity @Table)
 
@@ -22,7 +23,7 @@ Function Invoke-ListApplicationQueue {
         $ApplicationFile = $QueueFile.JSON | ConvertFrom-Json -Depth 10
         [PSCustomObject]@{
             tenantName      = $ApplicationFile.tenant
-            applicationName = $ApplicationFile.Applicationname
+            applicationName = $ApplicationFile.applicationName
             cmdLine         = $ApplicationFile.IntuneBody.installCommandLine
             assignTo        = $ApplicationFile.assignTo
             id              = $($QueueFile.RowKey)
