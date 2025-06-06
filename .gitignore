@@ -9,3 +9,5 @@ Logs
 ExcludedTenants
 SendNotifications/config.json
 .env
+__azurite_db_*.json
+__blobstorage__/
